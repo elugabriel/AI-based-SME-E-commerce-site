@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-commerce Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Welcome to Our E-commerce Platform</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/cart">Cart</a></li>
+
+        {% if current_user.is_authenticated %}
+          <li><a href="/logout">Logout</a></li>
+        {% else %}
+          <li><a href="/login">Login</a></li>
+          <li><a href="/register">Register</a></li>
+        {% endif %}
+        
+        {% if current_user.is_authenticated and current_user.is_admin %}
+          <li><a href="/admin">Admin Panel</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="categories">
+      <h2>Categories</h2>
+      <ul id="category-list">
+        <!-- Categories will be dynamically added here using JavaScript -->
+      </ul>
+    </section>
+
+    <section id="products">
+      <h2>Products</h2>
+      <div id="product-list" class="product-list">
+        <!-- Products will be dynamically added here using JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 E-commerce Platform</p>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Your Cart</h1>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/logout">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <main>
+      <section id="cart-items">
+          {% if cart_items %}
+              {% for item in cart_items %}
+                  <div class="cart-item">
+                      <img src="{{ item.product_image }}" alt="{{ item.product_name }}">
+                      <h3>{{ item.product_name }}</h3>
+                      <p>Price: ${{ item.product_price }}</p>
+                      <button onclick="removeFromCart({{ item.id }})">Remove</button>
+                  </div>
+              {% endfor %}
+          {% else %}
+              <p>Your cart is empty.</p>
+          {% endif %}
+      </section>
+  </main>
+  >
+  </main>
+
+  <footer>
+    <p>&copy; 2024 E-commerce Platform</p>
+  </footer>
+</body>
+</html>
