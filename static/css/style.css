@@ -55,13 +55,16 @@ nav ul li a {
   border-radius: 3px;
 }
 
-/* Product List */
+/* Adjust Product List Position */
 .product-list {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem;
+  margin-left: 50px; /* Shift products slightly to the right */
+  justify-content: flex-start; /* Align products from left but moved right */
 }
+
 
 .product {
   background-color: #fff;
