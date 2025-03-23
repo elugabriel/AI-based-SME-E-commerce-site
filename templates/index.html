@@ -12,17 +12,18 @@
     <nav>
       <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="/products"></a></li>
-        <li><a href="/cart">Cart</a></li>
+        <li><a href="/products">Products</a></li>
+        <li><a href="/cart">Cart <span id="cart-count">0</span></a></li>
       </ul>
     </nav>
-    <!-- Hamburger Menu (outside <nav>)
-    <div id="menu-icon">☰</div> -->
+
+    <!-- Hamburger Menu -->
+    <div id="menu-icon" onclick="toggleMenu()">☰</div>
   </header>
   
   <!-- Category Section (Initially Hidden) -->
   <section id="categories">
-    <ul id="category-list">
+    <ul id="category-list" class="hidden">
       <!-- Categories will be dynamically added using JavaScript -->
     </ul>
   </section>
@@ -36,7 +37,7 @@
   </main>
 
   <footer>
-    <p>&copy; 2024 AI powerd SME Platform</p>
+    <p>&copy; 2024 AI-powered SME Platform</p>
   </footer>
 
   <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>

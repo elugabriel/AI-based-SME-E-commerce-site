@@ -64,12 +64,15 @@ const products = [
   { id: 41, name: "mem sneaker", category: "Shoes", price: 135.00, image: "/static/assets/mshoe3.jpg" },
   { id: 53, name: "Iphone", category: "Phones", price: 70.99, image: "/static/assets/phone6.jpg" }
 ];
+
+
 // Cart storage
 let cart = [];
 
 // Function to render categories
 function renderCategories() {
     const categoryList = document.getElementById("category-list");
+    if (!categoryList) return;
     categoryList.innerHTML = categories.map(category =>
         `<li onclick="filterProducts('${category}')">${category}</li>`
     ).join("");
@@ -78,6 +81,7 @@ function renderCategories() {
 // Function to render products based on category filter
 function renderProducts(category = "All") {
     const productList = document.getElementById("product-list");
+    if (!productList) return;
 
     // Filter products based on category
     const filteredProducts = category === "All"
@@ -99,7 +103,7 @@ function filterProducts(category) {
     renderProducts(category);
 }
 
-// Function to add a product to the cart
+/// Function to add a product to the cart
 function addToCart(productId) {
     fetch("/add_to_cart", {
         method: "POST",
@@ -110,30 +114,39 @@ function addToCart(productId) {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message || "Error adding to cart.");
+        if (data.success) {
+            updateCartCount(data.cart_count); // Update the cart count UI
+            alert("Item added to cart successfully!");
+        } else {
+            alert(data.message || "Error adding to cart.");
+        }
     })
     .catch(error => console.error("Error:", error));
 }
 
-// Function to remove a product from the cart
-function removeFromCart(cartItemId) {
-    fetch("/remove_from_cart", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cart_item_id: cartItemId }),
-    })
+// Function to update cart count on the UI
+function updateCartCount(count) {
+    const cartCountElement = document.getElementById("cart-count");
+    if (cartCountElement) {
+        cartCountElement.textContent = count;
+    }
+}
+
+// Function to get the current cart count on page load
+function fetchCartCount() {
+    fetch("/cart_count")  // Endpoint to get the cart count from the server
     .then(response => response.json())
     .then(data => {
-        alert(data.message || "Error removing item.");
-        location.reload(); // Refresh to update cart
+        if (data.success) {
+            updateCartCount(data.cart_count);
+        }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => console.error("Error fetching cart count:", error));
 }
 
 // Initialize page content on load
 document.addEventListener("DOMContentLoaded", () => {
     renderCategories();
     renderProducts();
+    fetchCartCount(); // Fetch and update cart count when the page loads
 });

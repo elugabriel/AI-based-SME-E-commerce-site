@@ -102,3 +102,23 @@ footer {
   bottom: 0;
   width: 100%;
 }
+
+.cart {
+  font-size: 18px;
+  cursor: pointer;
+  padding: 10px;
+  background-color: #444;
+  color: white;
+  display: inline-block;
+  border-radius: 5px;
+  margin-left: 20px;
+}
+
+#cart-count {
+  font-weight: bold;
+  background: red;
+  color: white;
+  padding: 3px 7px;
+  border-radius: 50%;
+  margin-left: 5px;
+}
