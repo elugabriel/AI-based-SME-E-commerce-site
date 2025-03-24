@@ -1,45 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cart</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <header>
-    <h1>Your Cart</h1>
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/products">Products</a></li>
-        <li><a href="/logout">Logout</a></li>
-      </ul>
-    </nav>
-  </header>
+    <header>
+        <h1>Your Shopping Cart</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/cart">Cart (<span id="cart-count">{{ cart_items|length }}</span>)</a>
+            {% if current_user.is_authenticated %}
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+        </nav>
+    </header>
 
-  <main>
-    <main>
-      <section id="cart-items">
-          {% if cart_items %}
-              {% for item in cart_items %}
-                  <div class="cart-item">
-                      <img src="{{ item.product_image }}" alt="{{ item.product_name }}">
-                      <h3>{{ item.product_name }}</h3>
-                      <p>Price: ${{ item.product_price }}</p>
-                      <button onclick="removeFromCart({{ item.id }})">Remove</button>
-                  </div>
-              {% endfor %}
-          {% else %}
-              <p>Your cart is empty.</p>
-          {% endif %}
-      </section>
-  </main>
-  >
-  </main>
+    <div class="cart">
+        {% if cart_items %}
+            {% for item in cart_items %}
+            <div class="cart-item" id="cart-item-{{ item.product_id }}">
+                <img src="{{ url_for('static', filename='assets/' + item.product_image) }}" 
+                    alt="{{ item.product_name }}" 
+                    class="cart-image">
+                
+                <h2>{{ item.product_name }}</h2>
+                <p>Price: ${{ item.product_price }}</p>
+                <p>Quantity: <span id="qty-{{ item.product_id }}">{{ item.quantity }}</span></p>
+                <button class="remove-from-cart" data-product-id="{{ item.product_id }}">Remove</button>
+            </div>
+            {% endfor %}
+            
+            <button id="checkout-btn">Proceed to Checkout</button>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </div>
 
-  <footer>
-    <p>&copy; 2024 E-commerce Platform</p>
-  </footer>
+    <script>
+        function updateCartCount() {
+            $.get("/cart", function(data) {
+                $("#cart-count").text(data.cart_items.length);
+            });
+        }
+
+        // Remove item from cart
+        $(document).on("click", ".remove-from-cart", function () {
+            let productId = $(this).data("product-id");
+
+            $.ajax({
+                url: "/remove_from_cart",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ product_id: productId }),
+                success: function (response) {
+                    alert(response.message);
+                    $("#cart-item-" + productId).remove();  // Remove item from UI
+                    updateCartCount(); // Update cart count
+                },
+                error: function (xhr) {
+                    alert("Error: " + xhr.responseJSON.error);
+                }
+            });
+        });
+
+        // Checkout button redirect
+        $("#checkout-btn").click(function () {
+            window.location.href = "/checkout";
+        });
+
+        updateCartCount();
+    </script>
 </body>
 </html>

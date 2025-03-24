@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Checkout</h1>
+    </header>
+
+    <h2>Confirm your order</h2>
+    <button id="confirm-checkout">Confirm & Pay</button>
+
+    <script>
+        $("#confirm-checkout").click(function () {
+            $.post("/checkout", function () {
+                alert("Checkout complete!");
+                window.location.href = "/";
+            });
+        });
+    </script>
+</body>
+</html>

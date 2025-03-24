@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-  <header>
-    <h1>Login</h1>
-  </header>
-  <main>
-    <form method="POST">
-      <label for="username">Username:</label>
-      <input type="text" name="username" required>
-      
-      <label for="password">Password:</label>
-      <input type="password" name="password" required>
+    <div class="container">
+        <h2>Login</h2>
+        <form method="POST">
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" required>
 
-      <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
-  </main>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    </div>
 </body>
 </html>

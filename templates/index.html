@@ -1,45 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-commerce Platform</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <header>
-    <h1>Welcome to Our E-commerce Platform</h1>
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/products">Products</a></li>
-        <li><a href="/cart">Cart <span id="cart-count">0</span></a></li>
-      </ul>
-    </nav>
 
-    <!-- Hamburger Menu -->
-    <div id="menu-icon" onclick="toggleMenu()">☰</div>
-  </header>
-  
-  <!-- Category Section (Initially Hidden) -->
-  <section id="categories">
-    <ul id="category-list" class="hidden">
-      <!-- Categories will be dynamically added using JavaScript -->
-    </ul>
-  </section>
+    <header>
+        <h1>Welcome to Our Online Store</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('cart') }}">Cart (<span id="cart-count">0</span>)</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
 
-  <main>
-    <section id="products">
-      <div id="product-list" class="product-list">
-        <!-- Products will be dynamically added here using JavaScript -->
-      </div>
-    </section>
-  </main>
+    <main>
+        <h2>Available Products</h2>
+        <div class="product-container">
+            {% for product in products %}
+                <div class="product">
+                  <img src="{{ url_for('static', filename='assets/' + product.image) }}" 
+                  alt="{{ product.name }}" 
+                  class="product-image">
+                    <h3>{{ product.name }}</h3>
+                    <p>Category: {{ product.category }}</p>
+                    <p>Price: ${{ product.price }}</p>
+                    <button onclick="addToCart({{ product.id }})">Add to Cart</button>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
 
-  <footer>
-    <p>&copy; 2024 AI-powered SME Platform</p>
-  </footer>
-
-  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>
