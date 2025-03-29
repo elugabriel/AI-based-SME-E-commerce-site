@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__, static_folder='static')
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site6.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site7.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key'
 
@@ -220,18 +220,89 @@ def is_logged_in():
     return jsonify({"logged_in": current_user.is_authenticated})
 
 # Initialize Database
+# Initialize Database
 with app.app_context():
     db.create_all()
+
+    # Check if database is empty before adding products
     if not Product.query.first():
         sample_products = [
             Product(name="Laptop", category="Electronics", price=1200.00, image="headset2.jpg"),
             Product(name="Smartphone", category="Electronics", price=800.00, image="phone.jpg"),
             Product(name="Headphones", category="Accessories", price=150.00, image="headset2.jpg"),
-            Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth3.jpg")
+            Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth3.jpg"),
+            Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth4.jpg")
         ]
-        db.session.add_all(sample_products)
+        
+        # New products
+        new_products = [
+            Product(name="Ipad", category="Phones", price=110.00, image="ipad1.jpg"),
+            Product(name="Unisex shirt", category="Clothing", price=89.99, image="fcloth4.jpg"),
+            Product(name="White canvas", category="Shoes", price=30.00, image="mshoe5.jpg"),
+            Product(name="Earbud", category="Phones Accessories", price=15.75, image="bud.jpg"),
+            Product(name="Plain t-shirt", category="Clothing", price=140.50, image="m1.jpg"),
+            Product(name="Android", category="Phones", price=156.99, image="phone.png"),
+            Product(name="Female Casual Shoe", category="Shoes", price=180.20, image="fshoe5.jpg"),
+            Product(name="Charger", category="Phones Accessories", price=5.60, image="charger.jpg"),
+            Product(name="Android", category="Phones", price=145.00, image="phone7.jpg"),
+            Product(name="Arduino Board", category="Electronics", price=12.50, image="board2.jpg"),
+            Product(name="Female Shoe", category="Shoes", price=12.50, image="fshoe3.jpg"),
+            Product(name="Selfie Stick", category="Phone Accessories", price=190.00, image="stand3.jpg"),
+            Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth3.jpg"),
+            Product(name="Ipad", category="Phones", price=600.00, image="pad4.jpg"),
+            Product(name="Casual Shoe", category="Shoes", price=2.99, image="fshoe6.jpg"),
+            Product(name="Sensor", category="Electronics", price=22.40, image="board4.jpg"),
+            Product(name="Gown", category="Clothing", price=3.25, image="fcloth3.jpg"),
+            Product(name="Phone Stand", category="Phone Accessories", price=80.00, image="stand1.jpg"),
+            Product(name="D-bass", category="Phone Accessories", price=75.00, image="headset.png"),
+            Product(name="Sneaker", category="Shoes", price=88.88, image="mshoe1.jpg"),
+            Product(name="Ipad", category="Phones", price=350.00, image="pad3.jpg"),
+            Product(name="Iphone", category="Phones", price=160.25, image="iphone2.jpg"),
+            Product(name="Earbud", category="Phones Accessories", price=33.33, image="bud2.jpg"),
+            Product(name="Canvas", category="Shoes", price=77.77, image="mshoe7.jpg"),
+            Product(name="Shoe", category="Shoes", price=22.40, image="fshoe1.jpg"),
+            Product(name="Android", category="Phones", price=42.50, image="phone3.jpg"),
+            Product(name="Jeans", category="Clothing", price=72.30, image="jean.jpg"),
+            Product(name="Earbud", category="Phones Accessories", price=67.80, image="earbud.png"),
+            Product(name="Sneaker", category="Shoes", price=9.99, image="mshoe9.jpg"),
+            Product(name="Iphone", category="Phones", price=6.50, image="iphone1.jpg"),
+            Product(name="Gown", category="Clothing", price=45.75, image="fcloth9.jpg"),
+            Product(name="Tablet", category="Phones", price=5.00, image="tab6.jpg"),
+            Product(name="Earbud", category="Phones Accessories", price=7.25, image="bud4.jpg"),
+            Product(name="Micro board", category="Electronics", price=45.75, image="board3.jpg"),
+            Product(name="Phone", category="Phones", price=16.00, image="phone4.jpg"),
+            Product(name="Shoe", category="Shoes", price=14.99, image="fshoe8.jpg"),
+            Product(name="Sneaker", category="Shoes", price=200.00, image="male_s1.jpg"),
+            Product(name="Arduino Board", category="Electronics", price=10.96, image="board.jpg"),
+            Product(name="Sneaker", category="Shoes", price=125.00, image="msmhoe4.jpg"),
+            Product(name="Shirt", category="Clothing", price=150.00, image="fcloth1.jpg"),
+            Product(name="Selfie", category="Phone Accessories", price=12.00, image="stand2.jpg"),
+            Product(name="Earbud", category="Phones Accessories", price=120.45, image="bud5.jpg"),
+            Product(name="Tablet", category="Phones", price=58.00, image="tab7.jpg"),
+            Product(name="Android Phone", category="Phones", price=170.00, image="phone2.jpg"),
+            Product(name="USB Cable", category="Phones Accessories", price=9.99, image="able3.jpg"),
+            Product(name="Corporate Shoe", category="Shoes", price=10.96, image="fshoe2.jpg"),
+            Product(name="Female Shoe", category="Shoes", price=9.99, image="fshoe4.jpg"),
+            Product(name="Corporate Shoe", category="Shoes", price=55.55, image="fshoe7.jpg"),
+            Product(name="Round Neck T-shirt", category="Clothing", price=50.00, image="male_c1.jpg"),
+            Product(name="Headset", category="Phone Accessories", price=19.99, image="headset2.jpg"),
+            Product(name="Android", category="Phones", price=105.00, image="phone5.jpg"),
+            Product(name="Soldering Iron", category="Electronics", price=25.00, image="iron.jpg"),
+            Product(name="Cord", category="Phones Accessories", price=99.99, image="cord.jpg"),
+            Product(name="Sneaker", category="Shoes", price=20.00, image="sneaker1.jpg"),
+            Product(name="Jeans", category="Clothing", price=8.99, image="jean2.jpg"),
+            Product(name="Shirt", category="Clothing", price=65.00, image="mcloth5.jpg"),
+            Product(name="Shirt", category="Clothing", price=18.50, image="mshirt2.jpg"),
+            Product(name="Sneaker", category="Shoes", price=4.75, image="mshoe2.jpg"),
+            Product(name="Men's Sneaker", category="Shoes", price=135.00, image="mshoe3.jpg"),
+            Product(name="Iphone", category="Phones", price=70.99, image="phone6.jpg")
+        ]
+
+        # Add new products
+        db.session.add_all(sample_products + new_products)
         db.session.commit()
         print("✅ Sample products added to database!")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
