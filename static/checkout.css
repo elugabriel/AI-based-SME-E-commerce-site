@@ -1,3 +1,4 @@
+/* General Styling */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -6,52 +7,56 @@ body {
     text-align: center;
 }
 
+/* Header Styling */
 header {
     background-color: #333;
     color: white;
     padding: 15px 0;
+    font-size: 24px;
 }
 
-nav a {
-    color: white;
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.checkout-container {
+/* Order Summary Container */
+.order-summary {
     width: 350px;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin: 20px auto;
+    margin: 30px auto;
 }
 
-.checkout-list {
+/* Order List */
+.order-summary ul {
     list-style: none;
     padding: 0;
+    text-align: left;
 }
 
-.checkout-item {
+.order-summary li {
     background: #e0e0e0;
     padding: 10px;
-    margin: 5px 0;
+    margin: 8px 0;
     border-radius: 5px;
+    font-size: 16px;
 }
 
+/* Total Price */
 h3 {
     color: #333;
+    margin-top: 20px;
 }
 
+/* Confirm & Pay Button */
 button {
     background-color: #28a745;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 20px;
     cursor: pointer;
     border-radius: 5px;
-    margin-top: 10px;
+    font-size: 16px;
+    margin-top: 15px;
+    transition: background 0.3s;
 }
 
 button:hover {

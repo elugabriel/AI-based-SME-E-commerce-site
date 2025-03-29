@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__, static_folder='static')
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site7.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site8.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key'
 
@@ -43,11 +43,12 @@ class Product(db.Model):
 # Cart Model
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete="CASCADE"), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete="CASCADE"), nullable=False)
-    quantity = db.Column(db.Integer, default=1)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Link to User table
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)  # Link to Product table
+    quantity = db.Column(db.Integer, nullable=False, default=1)
 
-    product = db.relationship('Product', backref=db.backref('cart_items', lazy=True))
+    # Relationship
+    product = db.relationship('Product', backref='cart_items')  # Establishes link to Product model
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -132,46 +133,33 @@ def logout():
 
 # Add Product to Cart
 @app.route('/add_to_cart', methods=['POST'])
+@login_required
 def add_to_cart():
     data = request.get_json()
-    product_id = data.get("product_id")
+    product_id = data.get('product_id')
 
     if not product_id:
-        return jsonify({"error": "Product ID is required"}), 400
+        return jsonify({'error': 'Product ID is required'}), 400
 
     product = Product.query.get(product_id)
+
     if not product:
-        return jsonify({"error": "Product does not exist"}), 404
+        return jsonify({'error': 'Product not found'}), 404
 
-    if current_user.is_authenticated:
-        existing_cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
-        if existing_cart_item:
-            existing_cart_item.quantity += 1
-        else:
-            new_cart_item = Cart(user_id=current_user.id, product_id=product_id, quantity=1)
-            db.session.add(new_cart_item)
-        db.session.commit()
+    # Check if product already exists in cart
+    cart_item = Cart.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+
+    if cart_item:
+        cart_item.quantity += 1  # Increment quantity if product already in cart
     else:
-        if "cart" not in session:
-            session["cart"] = []
-        cart = session["cart"]
-        found = False
-        for item in cart:
-            if item["product_id"] == product_id:
-                item["quantity"] += 1
-                found = True
-                break
-        if not found:
-            cart.append({
-                "product_id": product_id,
-                "product_name": product.name,
-                "product_price": product.price,
-                "product_image": product.image,
-                "quantity": 1
-            })
-        session["cart"] = cart
+        cart_item = Cart(user_id=current_user.id, product_id=product_id, quantity=1)
+        db.session.add(cart_item)
 
-    return jsonify({"message": "Product added to cart!"}), 201
+    db.session.commit()
+
+    return jsonify({'message': 'Product added to cart successfully'})
+
+
 
 # View Cart
 @app.route('/cart')
@@ -198,15 +186,31 @@ def cart():
 @app.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    cart_items = session.get('cart', [])  # Assuming you're storing cart in session
-    total_amount = sum(item['product_price'] * item['quantity'] for item in cart_items)
-
     if request.method == 'POST':
-        # Process payment or order completion logic here
-        session['cart'] = []  # Clear the cart after successful checkout
-        return jsonify({"message": "Checkout complete!"})
+        # Process order
+        cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
-    return render_template('checkout.html', cart_items=cart_items, total_amount=total_amount)
+        if not cart_items:
+            return jsonify({"message": "Your cart is empty!"}), 400
+
+        # Simulate order processing
+        total_price = sum(item.product.price * item.quantity for item in cart_items)
+
+        # Clear cart after checkout
+        Cart.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+
+        return jsonify({"message": "Checkout complete!", "total_paid": total_price})
+
+    # If it's a GET request, show order summary
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    order_summary = [{"product_name": item.product.name, "quantity": item.quantity} for item in cart_items]
+    total_price = sum(item.product.price * item.quantity for item in cart_items)
+
+    return render_template("checkout.html", cart_items=order_summary, total_price=total_price)
+
+
+
 
 
 @app.route('/remove_from_cart', methods=['POST'])
@@ -236,6 +240,14 @@ def remove_from_cart():
 @app.route("/is_logged_in")
 def is_logged_in():
     return jsonify({"logged_in": current_user.is_authenticated})
+
+
+@app.route('/cart_count')
+@login_required
+def cart_count():
+    count = Cart.query.filter_by(user_id=current_user.id).count()
+    return jsonify({'count': count})
+
 
 # Initialize Database
 # Initialize Database

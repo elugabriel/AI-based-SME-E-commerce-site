@@ -6,39 +6,46 @@
     <title>Checkout</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='checkout.css') }}">
+
+
 </head>
+
+
 <body>
     <header>
         <h1>Checkout</h1>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/cart">Cart</a>
-        </nav>
     </header>
 
-    <div class="checkout-container">
-        <h2>Order Summary</h2>
-        
-        <ul class="checkout-list">
+    <h2>Order Summary</h2>
+
+    <div class="order-summary">
+        <ul>
             {% for item in cart_items %}
-                <li class="checkout-item">
-                    {{ item.product_name }}
-                </li>
+                <li>{{ item.product_name }}{% if item.quantity > 1 %} (x{{ item.quantity }}){% endif %}</li>
             {% endfor %}
         </ul>
-
-        <h3>Total Amount: ${{ total_amount }}</h3>
         
-        <button id="confirm-checkout">Confirm & Pay</button>
+        <h3>Total: ${{ total_price }}</h3>
     </div>
 
-    <script>
-        $("#confirm-checkout").click(function () {
-            $.post("/checkout", function () {
-                alert("Checkout complete!");
-                window.location.href = "/";
-            });
-        });
-    </script>
+    <button id="confirm-checkout">Confirm & Pay</button>
+
+   
+
+<script>
+    document.getElementById("confirm-checkout").addEventListener("click", function() {
+        fetch("/checkout", {
+            method: "POST",  
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = "/";
+        })
+        .catch(error => console.error("Error:", error));
+    });
+</script>
+
 </body>
 </html>

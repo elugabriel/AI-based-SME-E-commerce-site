@@ -11,21 +11,30 @@ function addToCart(productId) {
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message);
-        updateCartCount();
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            alert(data.message);
+            updateCartCount();
+        }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        alert("Failed to add item to cart. Please try again.");
+    });
 }
 
 // Function to Update Cart Count
 function updateCartCount() {
-    fetch("/cart")
-    .then(response => response.text())
-    .then(html => {
-        let parser = new DOMParser();
-        let doc = parser.parseFromString(html, "text/html");
-        let cartItems = doc.querySelectorAll(".cart-item").length;
-        document.getElementById("cart-count").innerText = cartItems;
+    fetch("/cart_count")  // Fetches only the cart count (create this route in Flask)
+    .then(response => response.json())
+    .then(data => {
+        let cartCountElement = document.getElementById("cart-count");
+        if (cartCountElement) {
+            cartCountElement.innerText = data.count;
+        }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+    });
 }

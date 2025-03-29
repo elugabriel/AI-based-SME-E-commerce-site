@@ -79,18 +79,28 @@ def cart():
 
     return jsonify(cart_data)
 
-@app.route('/checkout', methods=['POST'])
+@app.route('/checkout')
+@login_required
 def checkout():
-    data = request.get_json()
-    user_id = data.get('user_id')
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
 
-    if not user_id:
-        return jsonify({"error": "User ID is required"}), 400
+    if not cart_items:
+        return render_template("checkout.html", cart_items=[], total_price=0)
 
-    Cart.query.filter_by(user_id=user_id).delete()
-    db.session.commit()
-    
-    return jsonify({"message": "Checkout complete!"})
+    order_summary = []
+    total_price = 0
+
+    for item in cart_items:
+        product = Product.query.get(item.product_id)  # Get product details
+        if product:
+            order_summary.append({
+                "product_name": product.name,  # Assuming 'name' is the column for product name
+                "quantity": item.quantity
+            })
+            total_price += product.price * item.quantity  # Assuming 'price' is the column for product price
+
+    return render_template("checkout.html", cart_items=order_summary, total_price=total_price)
+
 
 # Initialize database
 with app.app_context():
