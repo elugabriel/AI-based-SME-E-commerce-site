@@ -5,15 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='checkout.css') }}">
 </head>
 <body>
     <header>
         <h1>Checkout</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/cart">Cart</a>
+        </nav>
     </header>
 
-    <h2>Confirm your order</h2>
-    <button id="confirm-checkout">Confirm & Pay</button>
+    <div class="checkout-container">
+        <h2>Order Summary</h2>
+        
+        <ul class="checkout-list">
+            {% for item in cart_items %}
+                <li class="checkout-item">
+                    {{ item.product_name }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h3>Total Amount: ${{ total_amount }}</h3>
+        
+        <button id="confirm-checkout">Confirm & Pay</button>
+    </div>
 
     <script>
         $("#confirm-checkout").click(function () {

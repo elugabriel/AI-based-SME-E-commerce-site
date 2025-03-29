@@ -63,12 +63,20 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        print(request.form)  # Debugging Step 1
+        
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         email = request.form.get('email')
         phone_number = request.form.get('phone_number')
         address = request.form.get('address')
         password = request.form.get('password')
+
+        if not first_name or not last_name or not email or not phone_number or not address or not password:
+            flash("All fields are required!", "danger")
+            return redirect(url_for('register'))
+        
+        print("Form Data Received")  # Debugging Step 2
 
         if User.query.filter_by(email=email).first():
             flash("Email already exists!", "danger")
@@ -80,14 +88,22 @@ def register():
             email=email,
             phone_number=phone_number,
             address=address,
-            password=password  # No hashing
+            password=password
         )
         db.session.add(new_user)
-        db.session.commit()
-        flash("Registration successful! Please login.", "success")
-        return redirect(url_for('login'))
+
+        try:
+            db.session.commit()
+            flash("Registration successful! Please login.", "success")
+            return redirect(url_for('login'))
+        except Exception as e:
+            db.session.rollback()
+            print(f"Database Error: {e}")  # Debugging Step 3
+            flash("An error occurred while saving your data.", "danger")
+            return redirect(url_for('register'))
 
     return render_template('register.html')
+
 
 # Login Route
 @app.route('/login', methods=['GET', 'POST'])
@@ -182,14 +198,16 @@ def cart():
 @app.route('/checkout', methods=['GET', 'POST'])
 @login_required
 def checkout():
-    
-    if request.method == 'POST':
-        Cart.query.filter_by(user_id=current_user.id).delete()
-        db.session.commit()
-        flash("Checkout complete!", "success")
-        return redirect(url_for('home'))
+    cart_items = session.get('cart', [])  # Assuming you're storing cart in session
+    total_amount = sum(item['product_price'] * item['quantity'] for item in cart_items)
 
-    return render_template('checkout.html')
+    if request.method == 'POST':
+        # Process payment or order completion logic here
+        session['cart'] = []  # Clear the cart after successful checkout
+        return jsonify({"message": "Checkout complete!"})
+
+    return render_template('checkout.html', cart_items=cart_items, total_amount=total_amount)
+
 
 @app.route('/remove_from_cart', methods=['POST'])
 def remove_from_cart():

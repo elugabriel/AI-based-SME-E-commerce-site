@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='cart.css') }}">
 </head>
 <body>
     <header>
@@ -21,7 +21,7 @@
         </nav>
     </header>
 
-    <div class="cart">
+    <div class="cart-container">
         {% if cart_items %}
             {% for item in cart_items %}
             <div class="cart-item" id="cart-item-{{ item.product_id }}">
@@ -29,16 +29,18 @@
                     alt="{{ item.product_name }}" 
                     class="cart-image">
                 
-                <h2>{{ item.product_name }}</h2>
-                <p>Price: ${{ item.product_price }}</p>
-                <p>Quantity: <span id="qty-{{ item.product_id }}">{{ item.quantity }}</span></p>
-                <button class="remove-from-cart" data-product-id="{{ item.product_id }}">Remove</button>
+                <div class="cart-details">
+                    <h2 class="cart-product-name">{{ item.product_name }}</h2>
+                    <p class="cart-price">Price: ${{ item.product_price }}</p>
+                    <p class="cart-quantity">Quantity: <span id="qty-{{ item.product_id }}">{{ item.quantity }}</span></p>
+                    <button class="remove-from-cart" data-product-id="{{ item.product_id }}">Remove</button>
+                </div>
             </div>
             {% endfor %}
             
             <button id="checkout-btn">Proceed to Checkout</button>
         {% else %}
-            <p>Your cart is empty.</p>
+            <p class="empty-cart">Your cart is empty.</p>
         {% endif %}
     </div>
 
