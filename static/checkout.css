@@ -7,13 +7,11 @@ body {
     text-align: center;
 }
 
-/* Header Styling */
 header {
     background-color: #333;
     color: white;
     padding: 15px 0;
-    font-size: 24px;
-}
+  }
 
 /* Order Summary Container */
 .order-summary {
@@ -61,4 +59,17 @@ button {
 
 button:hover {
     background-color: #218838;
+}
+
+/* Header Navigation Links */
+header a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    margin: 0 15px;
+}
+
+/* Change link color on hover */
+header a:hover {
+    text-decoration: underline;
 }
