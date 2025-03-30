@@ -44,6 +44,24 @@
         {% endif %}
     </div>
 
+    <!-- Recommended Products Section -->
+    {% if recommended_products %}
+    <h2>Recommended for You</h2>
+    <div class="recommended-container">
+        {% for product in recommended_products %}
+            <div class="product">
+                <img src="{{ url_for('static', filename='assets/' + product.image) }}" 
+                alt="{{ product.name }}" 
+                class="product-image">
+                <h3>{{ product.name }}</h3>
+                <p>Category: {{ product.category }}</p>
+                <p>Price: ${{ product.price }}</p>
+                <button onclick="addToCart({{ product.id }})">Add to Cart</button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <script>
         function updateCartCount() {
             $.get("/cart", function(data) {

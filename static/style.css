@@ -22,7 +22,8 @@ nav a {
 }
 
 /* Product Container */
-.product-container {
+.product-container,
+.recommended-container {  /* Updated to style recommended products */
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
@@ -42,21 +43,21 @@ nav a {
 }
 
 .product-image {
-  max-width: 250px;   /* Set max width for better scaling */
-  height: auto;       /* Keep aspect ratio */
-  object-fit: cover;  /* Prevent distortion */
-  display: block;     /* Fix layout issues */
-  margin: auto;       /* Center image */
-  border-radius: 8px; /* Optional: Rounded corners */
-}
-
-.cart-image {
-  width: 80px;
-  height: 80px;
+  max-width: 250px;
+  height: auto;
   object-fit: cover;
-  border-radius: 5px;
+  display: block;
+  margin: auto;
+  border-radius: 8px;
 }
 
+/* Styling for recommended products */
+.recommended-container {
+  margin-top: 30px;
+  padding: 20px;
+  background: #e9f5ff; /* Light blue background to differentiate section */
+  border-radius: 10px;
+}
 
 /* Button Styling */
 button {
