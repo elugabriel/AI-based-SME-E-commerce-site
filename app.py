@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, url_for, redirect, flash
+from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,13 +9,17 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
 import random
+import os
+
 
 app = Flask(__name__, static_folder='static')
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site3.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site5.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'assets', 'profiles')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -28,7 +33,9 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(255), nullable=False)
-    password = db.Column(db.String(100), nullable=False)  # No hashing
+    password = db.Column(db.String(100), nullable=False)
+    profile_picture = db.Column(db.String(255), nullable=True) 
+  
     
 
 def get_user_by_id(user_id):
@@ -39,8 +46,8 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-    # def check_password(self, password):
-    #     return check_password_hash(self.password_hash, password)
+  
+   
 
 # Product Model
 class Product(db.Model):
@@ -169,25 +176,34 @@ def home():
 # Registration Route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    profile_picture = request.files.get('profile_picture')
     if request.method == 'POST':
         print(request.form)  # Debugging Step 1
-        
+
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         email = request.form.get('email')
         phone_number = request.form.get('phone_number')
         address = request.form.get('address')
         password = request.form.get('password')
+        profile_picture = request.files.get('profile_picture')
 
         if not first_name or not last_name or not email or not phone_number or not address or not password:
             flash("All fields are required!", "danger")
             return redirect(url_for('register'))
-        
+
         print("Form Data Received")  # Debugging Step 2
 
         if User.query.filter_by(email=email).first():
             flash("Email already exists!", "danger")
             return redirect(url_for('register'))
+
+        # Save profile picture if provided
+        profile_pic_filename = None
+        if profile_picture and profile_picture.filename != '':
+            filename = secure_filename(profile_picture.filename)
+            profile_pic_filename = filename
+            profile_picture.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
         new_user = User(
             first_name=first_name,
@@ -195,7 +211,8 @@ def register():
             email=email,
             phone_number=phone_number,
             address=address,
-            password=password
+            password=password,
+            profile_picture=profile_pic_filename
         )
         db.session.add(new_user)
 
@@ -205,7 +222,7 @@ def register():
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            print(f"Database Error: {e}")  # Debugging Step 3
+            print(f"Database Error: {e}")
             flash("An error occurred while saving your data.", "danger")
             return redirect(url_for('register'))
 
@@ -391,10 +408,10 @@ with app.app_context():
     if not Product.query.first():
         sample_products = [
             Product(name="Laptop", category="Electronics", price=1200.00, image="headset2.jpg"),
-            Product(name="Smartphone", category="Electronics", price=800.00, image="phone.jpg"),
+            # Product(name="Smartphone", category="Electronics", price=800.00, image="phone.jpg"),
             Product(name="Headphones", category="Accessories", price=150.00, image="headset2.jpg"),
             Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth3.jpg"),
-            Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth4.jpg")
+            # Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth4.jpg")
         ]
         
         # New products

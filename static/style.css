@@ -21,9 +21,60 @@ nav a {
   font-size: 16px;
 }
 
+/* User Profile Styling */
+.user-profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align everything to the right */
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.profile-pic {
+  width: 60px; /* Increased size for better visibility */
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align name and logout to the right */
+  justify-content: center;
+  text-align: right;
+}
+
+.username {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+button.logout {
+  background-color: #dc3545; /* Red button for logout */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button.logout:hover {
+  background-color: #c82333;
+}
+
 /* Product Container */
 .product-container,
-.recommended-container {  /* Updated to style recommended products */
+.recommended-container {  
   display: flex;
   flex-wrap: wrap;
   gap: 20px;

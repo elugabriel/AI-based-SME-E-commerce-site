@@ -3,10 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+import random
+
 app = Flask(__name__, static_folder='static')
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site8.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce_site3.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key'
 
@@ -23,6 +29,10 @@ class User(db.Model, UserMixin):
     phone_number = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(100), nullable=False)  # No hashing
+    
+
+def get_user_by_id(user_id):
+    return db.session.get(User, int(user_id))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -35,11 +45,17 @@ def load_user(user_id):
 # Product Model
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    category = db.Column(db.String(50), nullable=False, default="Uncategorized")
+    name = db.Column(db.String(255), nullable=False)
+    category = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String(200), nullable=True, default="default.jpg")
+    image = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    tags = db.Column(db.String(255), nullable=True)  # ADD THIS
+    brand = db.Column(db.String(255), nullable=True)  # Ensure brand also exists
 
+
+    
+    
 # Cart Model
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,6 +66,82 @@ class Cart(db.Model):
     # Relationship
     product = db.relationship('Product', backref='cart_items')  # Establishes link to Product model
 
+def get_recommendations(user_id):
+    user_purchases = get_user_purchases(user_id)
+
+    if not user_purchases:
+        return []  # Return an empty list if the user has no purchases
+
+    purchased_product_ids = [p.id for p in user_purchases]
+    all_products = Product.query.all()
+
+    if not all_products:
+        return []  # Return an empty list if no products exist
+
+    product_texts = [p.name + " " + p.category + " " + p.description for p in all_products]
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(product_texts)
+
+    try:
+        user_vector = tfidf_matrix[purchased_product_ids]
+        similarity_scores = cosine_similarity(user_vector, tfidf_matrix)
+
+        recommended_indices = similarity_scores.argsort()[0][-5:]  # Top 5 recommendations
+        recommended_products = [all_products[i] for i in recommended_indices if all_products[i].id not in purchased_product_ids]
+
+        return recommended_products if recommended_products else []
+
+    except Exception as e:
+        print(f"Error in recommendation system: {e}")
+        return []
+
+
+
+def get_cart_recommendations(cart_items):
+    if not cart_items:
+        return []  # No recommendations if cart is empty
+
+    print("Cart Items:", cart_items)  # Debugging
+
+    # Fetch product categories from the database using product_id
+    cart_categories = set()
+    for item in cart_items:
+        product = Product.query.get(item['product_id'])  # Fetch product details
+        if product:
+            cart_categories.add(product.category)  # Extract category
+
+    if not cart_categories:
+        return []  # No recommendations if categories are missing
+
+    # Fetch all products in the same category (excluding cart items)
+    all_products = Product.query.filter(Product.category.in_(cart_categories)).all()
+
+    # Exclude products already in the cart
+    cart_product_ids = {item['product_id'] for item in cart_items}
+    filtered_products = [p for p in all_products if p.id not in cart_product_ids]
+
+    # Select up to 3 random products from the filtered list
+    recommended_products = random.sample(filtered_products, min(len(filtered_products), 3))
+
+    return recommended_products
+
+
+
+
+
+
+def compute_similarity():
+    products = Product.query.all()
+    product_texts = [f"{p.name} {p.category} {p.description} {p.tags or ''} {p.brand or ''}" for p in products]
+
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(product_texts)
+    similarity_matrix = cosine_similarity(tfidf_matrix)
+
+    return products, similarity_matrix
+
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -58,7 +150,21 @@ def load_user(user_id):
 @app.route('/')
 def home():
     products = Product.query.all()
-    return render_template('index.html', products=products)
+    recommended_products = []
+
+    if current_user.is_authenticated:
+        user = get_user_by_id(current_user.id)
+        recommended_products = get_recommendations(user.id)
+        
+        # Debugging output
+        print(f"Recommended Products: {recommended_products}")
+
+        if not isinstance(recommended_products, list):
+            print("Error: recommended_products is not a list!")
+            recommended_products = []  # Ensure it's a valid iterable
+
+    return render_template("index.html", products=products, recommended_products=recommended_products)
+
 
 # Registration Route
 @app.route('/register', methods=['GET', 'POST'])
@@ -180,7 +286,12 @@ def cart():
     if "cart" in session:
         cart_items += session["cart"]
 
-    return render_template('cart.html', cart_items=cart_items)
+    # Get recommended products
+    recommended_products = get_cart_recommendations(cart_items)
+
+    return render_template('cart.html', cart_items=cart_items, recommended_products=recommended_products)
+
+
 
 # Checkout Route
 @app.route('/checkout', methods=['GET', 'POST'])
@@ -249,6 +360,28 @@ def cart_count():
     return jsonify({'count': count})
 
 
+@app.route("/recommendations/<int:product_id>")
+def get_recommendations(product_id):
+    products, similarity_matrix = compute_similarity()
+    
+    product_index = next((i for i, p in enumerate(products) if p.id == product_id), None)
+    if product_index is None:
+        return jsonify({"error": "Product not found"}), 404
+
+    similar_indices = np.argsort(similarity_matrix[product_index])[::-1][1:6]  # Top 5
+    similar_products = [
+        {
+            "id": products[i].id,
+            "name": products[i].name,
+            "category": products[i].category,
+            "price": products[i].price
+        }
+        for i in similar_indices
+    ]
+
+    return jsonify(similar_products)
+
+
 # Initialize Database
 # Initialize Database
 with app.app_context():
@@ -258,10 +391,10 @@ with app.app_context():
     if not Product.query.first():
         sample_products = [
             Product(name="Laptop", category="Electronics", price=1200.00, image="headset2.jpg"),
-            Product(name="Smartphone", category="Electronics", price=800.00, image="phone.jpg"),
+            # Product(name="Smartphone", category="Electronics", price=800.00, image="phone.jpg"),
             Product(name="Headphones", category="Accessories", price=150.00, image="headset2.jpg"),
             Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth3.jpg"),
-            Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth4.jpg")
+            # Product(name="T-shirt", category="Clothing", price=10.00, image="mcloth4.jpg")
         ]
         
         # New products
